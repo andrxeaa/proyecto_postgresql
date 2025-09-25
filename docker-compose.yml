@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: policydb
+    volumes:
+      - policy_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  policy-service:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/policydb
+      CUSTOMER_SERVICE_URL: http://customer-service:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  policy_pgdata:
