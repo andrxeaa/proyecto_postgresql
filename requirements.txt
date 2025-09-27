@@ -6,6 +6,5 @@ databases
 pydantic
 httpx
 alembic
-Faker
 psycopg2-binary
 python-dotenv

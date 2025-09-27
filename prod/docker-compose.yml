@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: prod/Dockerfile
+    container_name: api_prod
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/policydb
