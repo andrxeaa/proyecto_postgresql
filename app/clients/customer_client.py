@@ -11,6 +11,7 @@ async def get_customer(customer_id: int):
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             r = await client.get(url)
+            
             if r.status_code == 200:
                 return r.json()
     except Exception:

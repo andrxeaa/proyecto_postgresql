@@ -14,7 +14,7 @@ class ProductCreate(BaseModel):
 class ProductRead(ProductCreate):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PolicyCoverageCreate(BaseModel):
     coverage_code: str

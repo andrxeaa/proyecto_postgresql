@@ -4,18 +4,30 @@ from fastapi.middleware.cors import CORSMiddleware
 from .db import engine, Base, get_session
 from . import models, crud, schemas
 from sqlalchemy.exc import IntegrityError
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Policy Service", version="1.0.0")
-
-app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_credentials=True,
-    allow_methods=["*"], allow_headers=["*"]
-)
-
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 👇 Startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    yield
+    # 👇 Shutdown (si quieres cerrar conexiones, limpiar recursos, etc.)
+    # await engine.dispose()
+
+app = FastAPI(
+    title="Policy Service",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 @app.post("/products", response_model=schemas.ProductRead)
 async def create_product(product: schemas.ProductCreate, db=Depends(get_session)):
