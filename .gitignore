@@ -1,0 +1,23 @@
+# Entorno virtual
+venv/
+.env
+*.pyc
+__pycache__/
+
+# Archivos de logs y temporales
+*.log
+*.sqlite3
+*.db
+
+# Configuración del IDE
+.idea/
+*.iml
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de testing/coverage
+.coverage
+htmlcov/
+.pytest_cache/

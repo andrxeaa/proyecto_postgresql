@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "Policy Service API",
+    "_postman_id": "b1a0b38c-1f77-4b63-bc1a-90a6f64b7ef9",
+    "description": "Colección para probar el CRUD de productos y pólizas en Policy Service.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Seguro de Vida\",\n  \"price\": 100.5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/products",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["products"]
+        }
+      }
+    },
+    {
+      "name": "Create Policy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"customer_id\": 1,\n  \"product_id\": 1,\n  \"policy_number\": \"POL123456\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/policies",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["policies"]
+        }
+      }
+    },
+    {
+      "name": "List Policies",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8000/policies?limit=10&offset=0",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["policies"],
+          "query": [
+            { "key": "limit", "value": "10" },
+            { "key": "offset", "value": "0" }
+          ]
+        }
+      }
+    }
+  ]
+}
