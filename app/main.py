@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .db import engine, Base
-from .routers import product, policy
+from .routers import products, policy
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
