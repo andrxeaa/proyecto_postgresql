@@ -11,110 +11,109 @@ class ProductBase(BaseModel):
     code: str
     name: str
     description: Optional[str] = None
-    product_type: Optional[str] = None
-    base_premium: float
-
-# Para creación
-class ProductCreate(ProductBase):
-    pass  # ya hereda todo lo necesario
-
-# Para actualización parcial
-class ProductUpdate(BaseModel):
-    code: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    product_type: Optional[str] = None
-    base_premium: Optional[float] = None
-
-# Para respuestas
-class ProductResponse(ProductBase):
-    id: int
-    class Config:
-        orm_mode = True
-
-# --------------------
-# PolicyCoverage
-# --------------------
-class PolicyCoverageCreate(BaseModel):
-    coverage_code: str
-    coverage_name: str
-    coverage_limit: Optional[Decimal]
-    deductible: Optional[Decimal]
-
-class PolicyCoverageRead(PolicyCoverageCreate):
-    id: int
-    policy_id: int
-    class Config:
-        from_attributes = True
-
-# --------------------
-# Policy
-# --------------------
-class PolicyCreate(BaseModel):
-    policy_number: str
-    customer_id: int
-    product_id: str
-    agent_id: Optional[str]
-    start_date: Optional[date]
-    end_date: Optional[date]
-    sum_insured: Optional[Decimal]
-    premium: Optional[Decimal]
-    status: Optional[str]
-    coverages: Optional[List[PolicyCoverageCreate]] = []
-
-class PolicyRead(BaseModel):
-    id: int
-    policy_number: str
-    customer_id: int
-    product_id: str
-    agent_id: Optional[str]
-    start_date: Optional[date]
-    end_date: Optional[date]
-    sum_insured: Optional[Decimal]
-    premium: Optional[Decimal]
-    status: Optional[str]
-    created_at: datetime
-    coverages: Optional[List[PolicyCoverageRead]] = []
-
-    class Config:
-        from_attributes = True
-
-# --------------------
-# Beneficiary
-# --------------------
-class BeneficiaryCreate(BaseModel):
-    client_id: int
-    full_name: str
-    relationship: str
-    percentage: Optional[Decimal]
-    contact_info: Optional[str]
-
-class BeneficiaryRead(BeneficiaryCreate):
-    id: int
-    policy_id: int
-    class Config:
-        from_attributes = True
-
-class PolicyUpdate(BaseModel):
-    policy_number: Optional[str] = None
-    customer_id: Optional[int] = None
-    product_id: Optional[str] = None
-    agent_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    sum_insured: Optional[Decimal] = None
     premium: Optional[Decimal] = None
-    status: Optional[str] = None
+    sum_insured: Optional[Decimal] = None
+    status: Optional[str] = "ACTIVE"
+
+class ProductCreate(ProductBase):
+    """Schema para crear un producto (POST)."""
+    pass
+
+class ProductUpdate(BaseModel):
+    """Schema para actualizar parcialmente un producto (PATCH)."""
+    code: Optional[str]
+    name: Optional[str]
+    description: Optional[str]
+    premium: Optional[Decimal]
+    sum_insured: Optional[Decimal]
+    status: Optional[str]
+
+class ProductRead(ProductBase):
+    """Schema de lectura (lo que devuelve la API)."""
+    id: int
+    class Config:
+        from_attributes = True
+
+# ============================================================
+# COVERAGE (PolicyCoverage)
+# ============================================================
+
+class PolicyCoverageBase(BaseModel):
+    coverage_type: str
+    sum_assured: float
+
+
+class PolicyCoverageCreate(PolicyCoverageBase):
+    pass
+
 
 class PolicyCoverageUpdate(BaseModel):
-    coverage_code: Optional[str] = None
-    coverage_name: Optional[str] = None
-    coverage_limit: Optional[Decimal] = None
-    deductible: Optional[Decimal] = None
+    coverage_type: Optional[str] = None
+    sum_assured: Optional[float] = None
+
+
+class PolicyCoverageRead(PolicyCoverageBase):
+    id: int
+    policy_id: int
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================
+# BENEFICIARY
+# ============================================================
+
+class BeneficiaryBase(BaseModel):
+    name: str
+    relation: str
+    percentage: float
+
+
+class BeneficiaryCreate(BeneficiaryBase):
+    pass
+
 
 class BeneficiaryUpdate(BaseModel):
-    client_id: Optional[int] = None
-    full_name: Optional[str] = None
-    relationship: Optional[str] = None
-    percentage: Optional[Decimal] = None
-    contact_info: Optional[str] = None
+    name: Optional[str] = None
+    relation: Optional[str] = None
+    percentage: Optional[float] = None
+
+
+class BeneficiaryRead(BeneficiaryBase):
+    id: int
+    policy_id: int
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================
+# POLICY
+# ============================================================
+
+class PolicyBase(BaseModel):
+    product_id: str  # se refiere al Product.code
+    customer_id: int
+    agent_id: Optional[str] = None
+    status: str = "ACTIVE"
+
+
+class PolicyCreate(PolicyBase):
+    # puedes crear póliza con coberturas
+    coverages: Optional[List[PolicyCoverageCreate]] = None
+
+
+class PolicyUpdate(BaseModel):
+    product_id: Optional[str] = None
+    customer_id: Optional[int] = None
+    agent_id: Optional[str] = None
+    status: Optional[str] = None
+
+
+class PolicyRead(PolicyBase):
+    id: int
+    coverages: List[PolicyCoverageRead] = []
+
+    class Config:
+        from_attributes = True
