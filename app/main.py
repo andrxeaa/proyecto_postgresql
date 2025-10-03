@@ -10,7 +10,7 @@ from .routers import products, policy
 async def lifespan(app: FastAPI):
     # Startup: crear tablas si no existen
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
     yield
     # Shutdown: opcional, cerrar engine
     await engine.dispose()
