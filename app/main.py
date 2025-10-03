@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 # Routers
-app.include_router(product.router)
+app.include_router(products.router)
 app.include_router(policy.router)
 
 # Healthcheck
