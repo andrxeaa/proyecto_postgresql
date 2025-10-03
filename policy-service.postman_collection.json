@@ -1,74 +1,345 @@
 {
   "info": {
-    "name": "Policy Service API",
-    "_postman_id": "b1a0b38c-1f77-4b63-bc1a-90a6f64b7ef9",
-    "description": "Colección para probar el CRUD de productos y pólizas en Policy Service.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "Policy Service - Postman Collection",
+    "description": "Colección para probar endpoints de products, policies, coverages y beneficiaries (FastAPI async). Cambia {{base_url}} según tu entorno (ej. http://localhost:8000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "policy-service-collection-0001"
   },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
   "item": [
     {
-      "name": "Create Product",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      "name": "Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"name\": \"Seguro de Vida\",\n  \"price\": 100.5\n}"
         },
-        "url": {
-          "raw": "http://localhost:8000/products",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
-          "path": ["products"]
-        }
-      }
-    },
-    {
-      "name": "Create Policy",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        {
+          "name": "Get Product by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"]
+            }
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"customer_id\": 1,\n  \"product_id\": 1,\n  \"policy_number\": \"POL123456\"\n}"
         },
-        "url": {
-          "raw": "http://localhost:8000/policies",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
-          "path": ["policies"]
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"PRD999\",\n  \"name\": \"Seguro Test\",\n  \"description\": \"Producto generado desde Postman\",\n  \"product_type\": \"LIFE\",\n  \"base_premium\": 120.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Patch Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Seguro Test Mod\",\n  \"base_premium\": 130.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"]
+            }
+          }
         }
-      }
+      ]
     },
+
     {
-      "name": "List Policies",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8000/policies?limit=10&offset=0",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8000",
-          "path": ["policies"],
-          "query": [
-            { "key": "limit", "value": "10" },
-            { "key": "offset", "value": "0" }
-          ]
+      "name": "Policies",
+      "item": [
+        {
+          "name": "List Policies (with filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies?customerId=123&status=ACTIVE",
+              "host": ["{{base_url}}"],
+              "path": ["policies"],
+              "query": [
+                { "key": "customerId", "value": "123" },
+                { "key": "status", "value": "ACTIVE" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Policy by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id"]
+            }
+          }
+        },
+        {
+          "name": "Create Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy_number\": \"POL-999999\",\n  \"customer_id\": 123,\n  \"product_id\": \"PRD001\",\n  \"agent_id\": \"AGT001\",\n  \"start_date\": \"2025-01-01\",\n  \"end_date\": \"2026-01-01\",\n  \"sum_insured\": 50000,\n  \"premium\": 500,\n  \"status\": \"ACTIVE\",\n  \"coverages\": [\n    { \"coverage_code\": \"COV-900\", \"coverage_name\": \"Cobertura Demo\", \"coverage_limit\": 10000, \"deductible\": 500 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies",
+              "host": ["{{base_url}}"],
+              "path": ["policies"]
+            }
+          }
+        },
+        {
+          "name": "Patch Policy",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Policy (soft cancel)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Policy (hard delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id?hard=true",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id"],
+              "query": [{ "key": "hard", "value": "true" }]
+            }
+          }
         }
-      }
+      ]
+    },
+
+    {
+      "name": "Coverages (nested)",
+      "item": [
+        {
+          "name": "List coverages for a policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/coverages",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "coverages"]
+            }
+          }
+        },
+        {
+          "name": "Get coverage detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/coverages/:coverage_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "coverages", ":coverage_id"]
+            }
+          }
+        },
+        {
+          "name": "Create coverage for a policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverage_code\": \"COV-901\",\n  \"coverage_name\": \"Cobertura Extra\",\n  \"coverage_limit\": 20000,\n  \"deductible\": 250\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/coverages",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "coverages"]
+            }
+          }
+        },
+        {
+          "name": "Patch coverage",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverage_name\": \"Cobertura Actualizada\",\n  \"coverage_limit\": 25000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/coverages/:coverage_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "coverages", ":coverage_id"]
+            }
+          }
+        },
+        {
+          "name": "Delete coverage",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/coverages/:coverage_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "coverages", ":coverage_id"]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Beneficiaries (nested)",
+      "item": [
+        {
+          "name": "List beneficiaries for a policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/beneficiaries",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "beneficiaries"]
+            }
+          }
+        },
+        {
+          "name": "Get beneficiary detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/beneficiaries/:beneficiary_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "beneficiaries", ":beneficiary_id"]
+            }
+          }
+        },
+        {
+          "name": "Create beneficiary",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_id\": 456,\n  \"full_name\": \"Ana Perez\",\n  \"relationship\": \"Hijo\",\n  \"percentage\": 50.0,\n  \"contact_info\": \"ana.perez@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/beneficiaries",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "beneficiaries"]
+            }
+          }
+        },
+        {
+          "name": "Patch beneficiary",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"percentage\": 60.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/beneficiaries/:beneficiary_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "beneficiaries", ":beneficiary_id"]
+            }
+          }
+        },
+        {
+          "name": "Delete beneficiary",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/policies/:policy_id/beneficiaries/:beneficiary_id",
+              "host": ["{{base_url}}"],
+              "path": ["policies", ":policy_id", "beneficiaries", ":beneficiary_id"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

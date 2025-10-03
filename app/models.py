@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Text, Date, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, Text, Date, TIMESTAMP, ForeignKey, BigInteger
 from sqlalchemy.sql import func
 from .db import Base
 
@@ -42,3 +42,16 @@ class PolicyCoverage(Base):
     coverage_name = Column(String(255))
     coverage_limit = Column(Numeric(14, 2))
     deductible = Column(Numeric(12, 2))
+
+# --------------------
+# Beneficiary
+# --------------------
+class Beneficiary(Base):
+    __tablename__ = "beneficiary"
+    id = Column(BigInteger, primary_key=True, index=True)
+    policy_id = Column(BigInteger, ForeignKey("policy.id"), nullable=False)
+    client_id = Column(BigInteger, nullable=False)  # referencia lógica a microservicio de clientes
+    full_name = Column(String(255), nullable=False)
+    relationship = Column(String(50), nullable=False)  # Ej: hijo, cónyuge, padre
+    percentage = Column(Numeric(5, 2))
+    contact_info = Column(Text)

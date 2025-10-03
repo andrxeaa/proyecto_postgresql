@@ -1,51 +1,40 @@
 # app/main.py
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from .db import engine, Base, get_session
-from . import models, crud, schemas
-from sqlalchemy.exc import IntegrityError
 from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from .db import engine, Base
+from .routers import product, policy
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 👇 Startup
+    # Startup: crear tablas si no existen
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # 👇 Shutdown (si quieres cerrar conexiones, limpiar recursos, etc.)
-    # await engine.dispose()
+    # Shutdown: opcional, cerrar engine
+    await engine.dispose()
 
 app = FastAPI(
     title="Policy Service",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
+# CORS (dev: allow all; en prod restrinje origins)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-@app.post("/products", response_model=schemas.ProductRead)
-async def create_product(product: schemas.ProductCreate, db=Depends(get_session)):
-    return await crud.create_product(db, product)
+# Routers
+app.include_router(product.router)
+app.include_router(policy.router)
 
-@app.post("/policies")
-async def create_policy(policy: schemas.PolicyCreate, db=Depends(get_session)):
-    # validar customer con otro microservicio
-    from .clients.customer_client import get_customer
-    customer = await get_customer(policy.customer_id)
-    if not customer:
-        raise HTTPException(status_code=400, detail="Customer not found")
-    try:
-        created = await crud.create_policy(db, policy)
-        return {"id": created.id, "policy_number": created.policy_number}
-    except IntegrityError:
-        raise HTTPException(status_code=400, detail="Integrity error")
-
-@app.get("/policies")
-async def list_policies(limit: int = 100, offset: int = 0, db=Depends(get_session)):
-    return await crud.list_policies(db, limit, offset)
+# Healthcheck
+@app.get("/", tags=["health"])
+async def root():
+    return {"status": "ok"}
