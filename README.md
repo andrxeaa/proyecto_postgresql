@@ -169,61 +169,60 @@ Prefix: ``/policies``
     ```
     **Validaciones internas:**
 
-    - Verifica que product_id (product.code) exista.
+    - Verifica que ``product_id`` (``product.code``) exista.
 
-    - Puedes integrar validación de customer_id llamando al microservicio customer (si habilitado).
+    - Puedes integrar validación de ``customer_id`` llamando al microservicio ``customer`` (si habilitado).
 
-PATCH /policies/{policy_id}
-Actualización parcial de póliza (usar PolicyUpdate).
+- PATCH ``/policies/{policy_id}``
+    - Actualización parcial de póliza (usar ``PolicyUpdate``).
 
-DELETE /policies/{policy_id}
-Por defecto hace soft-cancel: pone status = "CANCELLED".
-Para borrado físico: DELETE /policies/{policy_id}?hard=true.
+- DELETE ``/policies/{policy_id}``
+    - Por defecto hace soft-cancel: pone ``status = "CANCELLED"``.
+    - Para borrado físico: ``DELETE /policies/{policy_id}?hard=true``.
 
-3) Coverages (anidados)
-Rutas bajo /policies/{policy_id}/coverages
+### 3) Coverages (anidados)
+Rutas bajo ``/policies/{policy_id}/coverages``
 
-GET /policies/{policy_id}/coverages — listar coberturas de la póliza.
+- GET ``/policies/{policy_id}/coverages`` — listar coberturas de la póliza.
 
-GET /policies/{policy_id}/coverages/{coverage_id} — detalle cobertura.
+- GET ``/policies/{policy_id}/coverages/{coverage_id}`` — detalle cobertura.
 
-POST /policies/{policy_id}/coverages — crear cobertura (body: PolicyCoverageCreate).
+- POST ``/policies/{policy_id}/coverages`` — crear cobertura (body: ``PolicyCoverageCreate``).
 
-PATCH /policies/{policy_id}/coverages/{coverage_id} — actualizar cobertura (parcial).
+- PATCH ``/policies/{policy_id}/coverages/{coverage_id}`` — actualizar cobertura (parcial).
 
-DELETE /policies/{policy_id}/coverages/{coverage_id} — eliminar cobertura.
+- DELETE ``/policies/{policy_id}/coverages/{coverage_id}`` — eliminar cobertura.
 
-4) Beneficiaries (anidados)
-Rutas bajo /policies/{policy_id}/beneficiaries
+### 4) Beneficiaries (anidados)
+Rutas bajo ``/policies/{policy_id}/beneficiaries``
 
-GET /policies/{policy_id}/beneficiaries — listar beneficiarios.
+- GET ``/policies/{policy_id}/beneficiaries`` — listar beneficiarios.
 
-GET /policies/{policy_id}/beneficiaries/{beneficiary_id} — detalle.
+- GET ``/policies/{policy_id}/beneficiaries/{beneficiary_id}`` — detalle.
 
-POST /policies/{policy_id}/beneficiaries — crear (BeneficiaryCreate).
+- POST ``/policies/{policy_id}/beneficiaries`` — crear (``BeneficiaryCreate``).
 
-PATCH /policies/{policy_id}/beneficiaries/{beneficiary_id} — actualizar parcial.
+- PATCH ``/policies/{policy_id}/beneficiaries/{beneficiary_id}`` — actualizar parcial.
 
-DELETE /policies/{policy_id}/beneficiaries/{beneficiary_id} — eliminar.
+- DELETE ``/policies/{policy_id}/beneficiaries/{beneficiary_id}`` — eliminar.
 
-Reglas recomendadas:
+## Reglas recomendadas:
 
-Validar policy_id no nulo y existencia antes de crear coberturas/beneficiarios.
+- Validar ``policy_id`` no nulo y existencia antes de crear coberturas/beneficiarios.
 
-Si aplicable, validar que la suma de percentage de beneficiarios por póliza ≤ 100.
+- Validar que la suma de percentage de beneficiarios por póliza ≤ 100.
 
-Esquemas (resumen)
-ProductCreate, ProductUpdate, ProductRead
+## Esquemas (resumen)
 
-PolicyCreate (incluye coverages), PolicyRead, PolicyUpdate
+- ProductCreate, ProductUpdate, ProductRead
 
-PolicyCoverageCreate, PolicyCoverageUpdate, PolicyCoverageRead
+- PolicyCreate (incluye coverages), PolicyRead, PolicyUpdate
 
-BeneficiaryCreate, BeneficiaryUpdate, BeneficiaryRead
+- PolicyCoverageCreate, PolicyCoverageUpdate, PolicyCoverageRead
 
-Todos los Read usan from_attributes = True (Pydantic v2) para poder aceptar instancias ORM directamente.
+- BeneficiaryCreate, BeneficiaryUpdate, BeneficiaryRead
 
-Comportamientos importantes y recomendaciones
+## Comportamientos importantes y recomendaciones
 Sesión async: la app usa AsyncSession (no mezclar con consultas síncronas .query()).
 
 Creación de tablas: Base.metadata.create_all() se ejecuta en startup (según main.py). En producción preferir migrations con Alembic.
