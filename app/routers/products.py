@@ -53,7 +53,9 @@ async def patch_product(id: int, product_update: schemas.ProductUpdate, db: Asyn
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    for key, value in product_update.dict(exclude_unset=True).items():
+    update_data = product_update.model_dump(exclude_unset=True) if hasattr(product_update, "model_dump") else product_update.dict(exclude_unset=True)
+
+    for key, value in update_data.items():
         setattr(product, key, value)
 
     await db.commit()

@@ -19,11 +19,11 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(BaseModel):
     """Schema para actualizar parcialmente un producto (PATCH)."""
-    code: Optional[str]
-    name: Optional[str]
-    description: Optional[str]
-    product_type: Optional[str]
-    base_premium: Optional[Decimal]
+    code: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    product_type: Optional[str] = None
+    base_premium: Optional[Decimal] = None
 
 class ProductRead(ProductBase):
     id: int
@@ -31,42 +31,7 @@ class ProductRead(ProductBase):
         from_attributes = True
 
 # --------------------
-# POLICY
-# --------------------
-class PolicyBase(BaseModel):
-    policy_number: str
-    customer_id: int
-    product_id: str  # se refiere a Product.code
-    agent_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    sum_insured: Optional[Decimal] = None
-    premium: Optional[Decimal] = None
-    status: Optional[str] = "ACTIVE"
-
-class PolicyCreate(PolicyBase):
-    coverages: Optional[List["PolicyCoverageCreate"]] = None
-
-class PolicyUpdate(BaseModel):
-    policy_number: Optional[str] = None
-    customer_id: Optional[int] = None
-    product_id: Optional[str] = None
-    agent_id: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
-    sum_insured: Optional[Decimal] = None
-    premium: Optional[Decimal] = None
-    status: Optional[str] = None
-
-class PolicyRead(PolicyBase):
-    id: int
-    coverages: List["PolicyCoverageRead"] = []
-
-    class Config:
-        from_attributes = True
-
-# --------------------
-# POLICY COVERAGE
+# POLICY COVERAGE (definir antes de Policy para evitar forward refs)
 # --------------------
 class PolicyCoverageBase(BaseModel):
     coverage_code: str
@@ -86,12 +51,11 @@ class PolicyCoverageUpdate(BaseModel):
 class PolicyCoverageRead(PolicyCoverageBase):
     id: int
     policy_id: int
-
     class Config:
         from_attributes = True
 
 # --------------------
-# BENEFICIARY
+# BENEFICIARY (también definido antes si se quiere)
 # --------------------
 class BeneficiaryBase(BaseModel):
     client_id: int
@@ -115,3 +79,48 @@ class BeneficiaryRead(BeneficiaryBase):
     policy_id: int
     class Config:
         from_attributes = True
+
+# --------------------
+# POLICY
+# --------------------
+class PolicyBase(BaseModel):
+    policy_number: str
+    customer_id: int
+    product_id: str  # referencia a product.code
+    agent_id: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    sum_insured: Optional[Decimal] = None
+    premium: Optional[Decimal] = None
+    status: Optional[str] = "ACTIVE"
+
+class PolicyCreate(PolicyBase):
+    # coverages opcional al crear
+    coverages: Optional[List[PolicyCoverageCreate]] = None
+
+class PolicyUpdate(BaseModel):
+    policy_number: Optional[str] = None
+    customer_id: Optional[int] = None
+    product_id: Optional[str] = None
+    agent_id: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    sum_insured: Optional[Decimal] = None
+    premium: Optional[Decimal] = None
+    status: Optional[str] = None
+
+class PolicyRead(PolicyBase):
+    id: int
+    created_at: Optional[datetime] = None        # si quieres exponer created_at
+    coverages: List[PolicyCoverageRead] = []
+    # opcional: beneficiaries si quieres incluirlos en el detalle
+    # beneficiaries: List[BeneficiaryRead] = []
+
+    class Config:
+        from_attributes = True
+
+# --- resolver forward-refs (Pydantic v2)
+PolicyCreate.model_rebuild()
+PolicyRead.model_rebuild()
+PolicyCoverageRead.model_rebuild()
+BeneficiaryRead.model_rebuild()
