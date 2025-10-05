@@ -48,26 +48,6 @@ DATABASE_URL=postgresql+asyncpg://<USER>:<PASSWORD>@<DB_HOST>:5432/<DB_NAME>
 
 > **IMPORTANTE**: `DATABASE_URL` debe usar el dialecto `postgresql+asyncpg://` para Async SQLAlchemy.
 
----
-
-## Ejecutar en local (desarrollo)
-1. Crear entorno y dependencias:
-```
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Crear .env con DATABASE_URL apuntando a tu Postgres (VM o local).
-
-## Levantar la app:
-
-```
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-La app ejecuta Base.metadata.create_all() en el startup (crea tablas si no existen).
-
 ## Ejecutar con Docker (producción)
 ### Construir imagen:
 
@@ -89,7 +69,7 @@ JSON OpenAPI: ``http://<host>:8000/openapi.json``
 
 ### Postman
 Importa la colección JSON ``policy-service.postman_collection.json``.
-Asegúrate de configurar la variable base_url a http://localhost:8000 o a la URL donde esté corriendo tu API.
+Asegúrate de configurar la variable base_url a la URL donde esté corriendo tu API.
 
 ## Endpoints — Resumen y ejemplos
 
@@ -223,43 +203,19 @@ Rutas bajo ``/policies/{policy_id}/beneficiaries``
 - BeneficiaryCreate, BeneficiaryUpdate, BeneficiaryRead
 
 ## Comportamientos importantes y recomendaciones
-Sesión async: la app usa AsyncSession (no mezclar con consultas síncronas .query()).
+- Sesión async: la app usa ``AsyncSession`` (no mezclar con consultas síncronas ``.query()``).
 
-Creación de tablas: Base.metadata.create_all() se ejecuta en startup (según main.py). En producción preferir migrations con Alembic.
+- Seeds: insertado por separado desde el repo de DB (archivo ``init/seed.sql``). Si importas repetidamente, evita duplicados (usa ON CONFLICT o comprueba existencia).
 
-Seeds: insertado por separado desde el repo de DB (archivo init/seed.sql). Si importas repetidamente, evita duplicados (usa ON CONFLICT o comprueba existencia).
+- Seguridad/CORS: en dev se usa ``allow_origins=["*"]``. En producción restringir orígenes.
 
-Seguridad/CORS: en dev se usa allow_origins=["*"]. En producción restringir orígenes.
+- Errores: endpoints lanzan 404 si entidad no existe, 400 para bad-request (ej. product inexistente al crear póliza), 422 para validaciones Pydantic.
 
-Errores: endpoints lanzan 404 si entidad no existe, 400 para bad-request (ej. product inexistente al crear póliza), 422 para validaciones Pydantic.
+## Últimas notas / despliegue en AWS (VMs)
+Para arquitectura propuesta (DB en VMs con alta disponibilidad + VMs para APIs con balanceador):
 
-Ejemplos rápidos (curl)
-Crear producto:
+- El ``DATABASE_URL`` que pongas en la VM de API debe usar la IP privada del balanceador / IP de la VM DB según red VPC.
 
-bash
-Copiar código
-curl -X POST http://localhost:8000/products \
-  -H "Content-Type: application/json" \
-  -d '{"code":"PRD100","name":"Seguro X","base_premium":100.0}'
-Listar pólizas filtradas:
+- Abrir puerto 5432 entre VPCs / security groups.
 
-bash
-Copiar código
-curl "http://localhost:8000/policies?customerId=123&status=ACTIVE"
-Crear póliza con cobertura:
-
-bash
-Copiar código
-curl -X POST http://localhost:8000/policies \
- -H "Content-Type: application/json" \
- -d '{"policy_number":"POL-1000","customer_id":123,"product_id":"PRD100","coverages":[{"coverage_code":"C1","coverage_name":"C1","coverage_limit":10000,"deductible":100}]}'
-Últimas notas / despliegue en AWS (VMs)
-Para arquitectura propuesta (DB en 2 VMs con alta disponibilidad + 2 VMs para APIs con balanceador):
-
-El DATABASE_URL que pongas en la VM de API debe usar la IP privada del balanceador / IP de la VM DB según red VPC.
-
-Abrir puerto 5432 entre VPCs / security groups.
-
-Automatizar builds y deploys con GitHub Actions: build imagen, push a Docker Hub / ECR, despliegue a VM vía SSH/Ansible/Cloud-Init o ECS/EKS.
-
-Para producción usa Alembic para migraciones y no create_all() automático.
+- Automatizar builds y deploys con GitHub Actions: build imagen, push a Docker Hub / ECR, despliegue a VM vía SSH/Ansible/Cloud-Init o ECS/EKS.
